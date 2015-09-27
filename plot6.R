@@ -69,7 +69,7 @@ data_plot <- aggregate(Emissions ~ year + fips, subset_NEI, sum)
 data_plot$fips[data_plot$fips=="24510"] <- "Baltimore, MD"
 data_plot$fips[data_plot$fips=="06037"] <- "Los Angeles, CA"
 
-png(filename = "plot6.png")
-plot <- ggplot(data_plot) + aes(x = factor(year), y = Emissions, group = factor(fips), colour = factor(fips)) + geom_point(size = 4) + geom_line() + labs(title = expression('Emissions of PM'[2.5] ~ ' in Baltimore City and Los Angeles County from motor vehicle sources'), x = "Year", y = expression("Total PM"[2.5] ~ "emission (tons)"), colour = "fips") + theme(plot.title = element_text(size = 8))
+png(filename = "plot6.png", width=640, height=480)
+plot <- ggplot(data_plot) + aes(x = factor(year), y = Emissions, group = factor(fips), colour = factor(fips)) + geom_line() + labs(title = expression('Vehicle Emissions of PM'[2.5] ~ ' in Baltimore City and Los Angeles County'), x = "Year", y = expression("Total PM"[2.5] ~ "emission (tons)"), colour = "fips") + theme(plot.title = element_text(size = 8))
 print(plot)
 dev.off()

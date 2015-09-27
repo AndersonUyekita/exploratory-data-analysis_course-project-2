@@ -67,7 +67,7 @@ with(baltimore, {
         x <- baltimore$year
         plot_data <- tapply(y, x, FUN = sum)
         
-        barplot(plot_data, main = expression('Total PM'[2.5] ~ ' in the United States'), ylab = expression('PM'[2.5] ~ 'Emissions'), xlab = "Year")
+        barplot(plot_data, main = expression('Total PM'[2.5] ~ ' in Baltimore City'), ylab = expression('PM'[2.5] ~ 'Emissions'), xlab = "Year")
         
         dev.off()
         

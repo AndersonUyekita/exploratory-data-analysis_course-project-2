@@ -69,6 +69,6 @@ data_plot <- aggregate(Emissions ~ year, subset_NEI, sum)
 
 png("plot5.png", width=840, height=480)
 g <- ggplot(data_plot, aes(factor(year), Emissions))
-g <- g + geom_bar(stat="identity") + xlab("year") + ylab(expression('Total PM'[2.5]*" Emissions (tons)")) + ggtitle('Emissions of PM'[2.5] ~ ' in Baltimore from motor vehicle sources')
+g <- g + geom_bar(stat="identity") + xlab("year") + ylab(expression('Total PM'[2.5]*" Emissions (tons)")) + ggtitle('Vehicle Emissions of PM'[2.5] ~ ' in Baltimore')
 print(g)
 dev.off()
