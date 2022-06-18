@@ -1,72 +1,78 @@
-#######################################################################################
-#                                                                                     #
-# Author: Anderson Hitoshi Uyekita                                                    #
-# Exploratory Data Analysis                                                           #
-# Course Project 02 - Week 3 - Coursera                                               #
-# File: plot1.R                                                                       #
-#                                                                                     #
-#######################################################################################
+################################################################################
+#                                                                              #
+#   Specialization: Data Science - Foundations using R Specialization          #
+#           Course: Exploratory Data Analysis                                  #
+#                                                                              #
+#           Author: Anderson Hitoshi Uyekita                                   #
+#             Date: 2022/06/17                                                 #
+#                                                                              #
+#   Course Project: EPA National Emissions Inventory (Week 4)                  #
+#      Deliverable: plot1.R                                                    #
+#                                                                              #
+################################################################################
 
-############################### 1. Work Directory #####################################
-# Saving the original work directory
-root_original <- getwd()
+########################### 1. Creating a folder ###############################
 
-# All manipulation data will start in the root.
-setwd("~")
-
-################################ 2. Work Directory ####################################
-# Create a project directory
-if(!file.exists("Project02"))
-{
-        dir.create("Project02")
+# 1. Create a data directory
+if(!base::file.exists("data")) {
+    base::dir.create("data")
 }
 
-# Set as Work Directory
-setwd("Project02")
+########################### 2. Downloading data ################################
 
-################################ 3. Download Data #####################################
-library(httr) 
-url <- "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip"
-if(!file.exists("FNEI_data.zip"))
-{
-        download.file(url, "FNEI_data.zip")
+# 2. Download files and store it in data directory.
+if(!base::file.exists("./data/FNEI_data.zip")){
+    utils::download.file(url = "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip",
+                         destfile = "./data/FNEI_data.zip")
 }
 
-# Removing the URL
-rm(url)
-
-# Unzipping the power_consumption file
-if(!file.exists("Source_Classification_Code.rds") | !file.exists("summarySCC_PM25.rds"))
-{
-        unzip("FNEI_data.zip", list = FALSE, overwrite = TRUE)
+# 2.1. Unzipping the FNEI_data.zip file.
+if(!base::file.exists("./data/unzipped/Source_Classification_Code.rds") | !base::file.exists("./data/unzipped/summarySCC_PM25.rds")){
+    utils::unzip(zipfile = "./data/FNEI_data.zip",
+                 exdir = "./data/unzipped/",
+                 list = FALSE,
+                 overwrite = TRUE)
 }
 
-file_unzipped <- c("./Source_Classification_Code.rds","./summarySCC_PM25.rds")
+########################### 3. Loading RDS files ###############################
 
-################################ 4. Loading the data ##################################
-raw_dataset = list(data.frame(),data.frame())
+# 3. Loading the RDS files.
+NEI <- readRDS("./data/unzipped/summarySCC_PM25.rds")
+SCC <- readRDS("./data/unzipped/Source_Classification_Code.rds")
 
-for (i in 1:length(file_unzipped))
-{
-        raw_dataset[[i]] <- readRDS(file_unzipped[i])
-}
-
-names(raw_dataset) <- c("SCC","NEI")
-
-
-rm(file_unzipped)
-
-#################################### 5. Plot 1  #######################################
-with(raw_dataset$NEI, {
-        
-        png(filename = "plot1.png")  
-        
-        y <- raw_dataset$NEI$Emissions/(10^6)
-        x <- raw_dataset$NEI$year
-        plot_data <- tapply(y, x, FUN = sum)
-        
-        barplot(plot_data, main = expression('Total PM'[2.5] ~ ' in the United States'), ylab = expression('PM'[2.5] ~ 'Emissions (10^6 tons)'), xlab = "Year")
-        
-        dev.off()
-        
+########################### 4. Plot 1 ##########################################
+with(data = NEI, {
+    
+    # Creating a PNG file.
+    png(filename = "plot1.png")  
+    
+    # Creating a subsetting to plot 1.
+    plot_1_data <- with(data = NEI,
+                        base::tapply(X = Emissions, # The tapply will create
+                                     INDEX = year,  # a total emissions of
+                                     FUN = sum))    # each year.
+    
+    # The above code has the same results of:
+    # plot_1_data <- NEI %>%
+    #     dplyr::group_by(year) %>%
+    #     dplyr::summarise(total = base::sum(Emissions))
+    
+    # Add a outer margin to the plot.
+    par(oma = c(1,1,1,1))
+    
+    # Creating the barchart plotting using base graphic system.
+    p <- barplot(plot_1_data/1000000,
+                 main = expression('Total PM'[2.5] ~ ' in the United States'),
+                 ylab = expression('PM'[2.5] ~ 'Emissions (10' ^6 ~ 'tons)'),
+                 xlab = "Year")
+    
+    # Adding text over the bars.
+    text(x = p,
+         y = plot_1_data/1000000 - 0.5 ,
+         label = format(plot_1_data/1000000,
+                        nsmall = 1,
+                        digits = 1))
+    
+    # Closing the device.
+    dev.off()      
 })
