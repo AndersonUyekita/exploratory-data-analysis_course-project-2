@@ -11,6 +11,12 @@
 #                                                                              #
 ################################################################################
 
+########################### Libraries Requirements #############################
+
+library(ggplot2)
+library(magrittr)
+library(tidyverse)
+
 ########################### 1. Creating a folder ###############################
 
 # 1. Create a data directory
@@ -37,87 +43,50 @@ if(!base::file.exists("./data/unzipped/Source_Classification_Code.rds") | !base:
 ########################### 3. Loading RDS files ###############################
 
 # 3. Loading the RDS files.
-NEI <- readRDS("./data/unzipped/summarySCC_PM25.rds")
-SCC <- readRDS("./data/unzipped/Source_Classification_Code.rds")
+NEI <- base::readRDS("./data/unzipped/summarySCC_PM25.rds")
+SCC <- base::readRDS("./data/unzipped/Source_Classification_Code.rds")
 
 ########################### 4. Dataset Manipulation ############################
 
-#######################################################################################
-#                                                                                     #
-# Author: Anderson Hitoshi Uyekita                                                    #
-# Exploratory Data Analysis                                                           #
-# Course Project 02 - Week 3 - Coursera                                               #
-# File: plot3.R                                                                      #
-#                                                                                     #
-#######################################################################################
+# 4.1. Creating a subsetting for Baltimore City.
+NEI_q3 <- base::subset(x = NEI, NEI$fips == "24510")
 
-############################### 1. Work Directory #####################################
-# Saving the original work directory
-root_original <- getwd()
-
-# All manipulation data will start in the root.
-setwd("~")
-
-################################ 2. Work Directory ####################################
-# Create a project directory
-if(!file.exists("Project02"))
-{
-        dir.create("Project02")
-}
-
-# Set as Work Directory
-setwd("Project02")
-
-################################ 3. Download Data #####################################
-library(httr) 
-url <- "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip"
-if(!file.exists("FNEI_data.zip"))
-{
-        download.file(url, "FNEI_data.zip")
-}
-
-# Removing the URL
-rm(url)
-
-# Unzipping the power_consumption file
-if(!file.exists("Source_Classification_Code.rds") | !file.exists("summarySCC_PM25.rds"))
-{
-        unzip("FNEI_data.zip", list = FALSE, overwrite = TRUE)
-}
-
-file_unzipped <- c("./Source_Classification_Code.rds","./summarySCC_PM25.rds")
-
-################################ 4. Loading the data ##################################
-raw_dataset = list(data.frame(),data.frame())
-
-for (i in 1:length(file_unzipped))
-{
-        raw_dataset[[i]] <- readRDS(file_unzipped[i])
-}
-
-names(raw_dataset) <- c("SCC","NEI")
-
-
-rm(file_unzipped)
+# 4.2. Summarizing the data set to calculate the total summation by year and type.
+plot_3_data <- NEI_q3 %>%
+    dplyr::group_by(type, year) %>%
+    dplyr::summarise(Total = base::sum(Emissions))
 
 #################################### 5. Plot 3  #######################################
-baltimore <- subset(raw_dataset$NEI, raw_dataset$NEI$fips == "24510")
-library(plyr)
-plot_data <- ddply(baltimore, .(year, type), numcolwise(sum))
+# 5.1. Creating a PNG file.
+grDevices::png(filename = "plot3.png", height = 480, width = 800)  
 
-aggTotalsBaltimore <- aggregate(Emissions ~ year + type, baltimore,sum)
+    # Plotting a GGPLOT2 graphic.
+    ggplot2::ggplot(data = plot_3_data,
+                    ggplot2::aes(x = year,
+                                 y = Total,
+                                 label = base::format(x = Total,
+                                                      nsmall = 1,
+                                                      digits = 1))) + 
+        
+    # Defining a line graphic.
+    ggplot2::geom_line(ggplot2::aes(color = type), lwd = 1) + 
+        
+    # Adding labels to each point.
+    ggplot2::geom_text(hjust = 0.5, vjust = 0.5) + 
+        
+    # Editing the Graphic Tile.
+    ggplot2::labs(title = base::expression('Emissions of PM'[2.5] ~ ' in Baltimore')) +
+        
+    # Adding x-axis label.
+    ggplot2::xlab("Year") + 
+        
+    # Adding y-axis label.
+    ggplot2::ylab(base::expression("Total PM"[2.5] ~ "emission (tons)")) +
+        
+    # Editing the legend position and tile position.
+    ggplot2::theme(legend.position = "right",
+                   legend.title.align = 0.5,
+                   plot.title = ggplot2::element_text(hjust = 0.5))
 
-library(ggplot2)
-with(baltimore, {
-        
-        png(filename = "plot3.png", width=640, height=480)  
-        
-        
-
-        plot <- ggplot(plot_data) + aes(x = factor(year), y = Emissions, group = type, col = type) + geom_line() + labs(title = expression('Emissions of PM'[2.5] ~ ' in Baltimore'), x = "Year", y = expression("Total PM"[2.5] ~ "emission (tons)"), fill = "Year")
-        
-        print(plot)
-        
-        dev.off()
-        
-})
+# Closing the device.
+grDevices::dev.off()

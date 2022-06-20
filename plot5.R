@@ -1,74 +1,106 @@
-#######################################################################################
-#                                                                                     #
-# Author: Anderson Hitoshi Uyekita                                                    #
-# Exploratory Data Analysis                                                           #
-# Course Project 02 - Week 3 - Coursera                                               #
-# File: plot5.R                                                                       #
-#                                                                                     #
-#######################################################################################
+################################################################################
+#                                                                              #
+#   Specialization: Data Science - Foundations using R Specialization          #
+#           Course: Exploratory Data Analysis                                  #
+#                                                                              #
+#           Author: Anderson Hitoshi Uyekita                                   #
+#             Date: 2022/06/18                                                 #
+#                                                                              #
+#   Course Project: EPA National Emissions Inventory (Week 4)                  #
+#      Deliverable: plot5.R                                                    #
+#                                                                              #
+################################################################################
 
-############################### 1. Work Directory #####################################
-# Saving the original work directory
-root_original <- getwd()
+########################### Libraries Requirements #############################
 
-# All manipulation data will start in the root.
-setwd("~")
-
-################################ 2. Work Directory ####################################
-# Create a project directory
-if(!file.exists("Project02"))
-{
-        dir.create("Project02")
-}
-
-# Set as Work Directory
-setwd("Project02")
-
-################################ 3. Download Data #####################################
-library(httr) 
-url <- "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip"
-if(!file.exists("FNEI_data.zip"))
-{
-        download.file(url, "FNEI_data.zip")
-}
-
-# Removing the URL
-rm(url)
-
-# Unzipping the power_consumption file
-if(!file.exists("Source_Classification_Code.rds") | !file.exists("summarySCC_PM25.rds"))
-{
-        unzip("FNEI_data.zip", list = FALSE, overwrite = TRUE)
-}
-
-file_unzipped <- c("./Source_Classification_Code.rds","./summarySCC_PM25.rds")
-
-################################ 4. Loading the data ##################################
-raw_dataset = list(data.frame(),data.frame())
-
-for (i in 1:length(file_unzipped))
-{
-        raw_dataset[[i]] <- readRDS(file_unzipped[i])
-}
-
-names(raw_dataset) <- c("SCC","NEI")
-
-
-rm(file_unzipped)
-
-#################################### 5. Plot 5  #######################################
 library(ggplot2)
-library(plyr)
+library(magrittr)
+library(tidyverse)
 
-SCC <- raw_dataset$SCC
-NEI <- raw_dataset$NEI
+########################### 1. Creating a folder ###############################
 
-subset_NEI <- NEI[NEI$fips=="24510" & NEI$type=="ON-ROAD", ]
+# 1. Create a data directory
+if(!base::file.exists("data")) {
+    base::dir.create("data")
+}
 
-data_plot <- aggregate(Emissions ~ year, subset_NEI, sum)
+########################### 2. Downloading data ################################
 
-png("plot5.png", width=840, height=480)
-g <- ggplot(data_plot, aes(factor(year), Emissions))
-g <- g + geom_bar(stat="identity") + xlab("year") + ylab(expression('Total PM'[2.5]*" Emissions (tons)")) + ggtitle('Vehicle Emissions of PM'[2.5] ~ ' in Baltimore')
-print(g)
-dev.off()
+# 2. Download files and store it in data directory.
+if(!base::file.exists("./data/FNEI_data.zip")){
+    utils::download.file(url = "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip",
+                         destfile = "./data/FNEI_data.zip")
+}
+
+# 2.1. Unzipping the FNEI_data.zip file.
+if(!base::file.exists("./data/unzipped/Source_Classification_Code.rds") | !base::file.exists("./data/unzipped/summarySCC_PM25.rds")){
+    utils::unzip(zipfile = "./data/FNEI_data.zip",
+                 exdir = "./data/unzipped/",
+                 list = FALSE,
+                 overwrite = TRUE)
+}
+
+########################### 3. Loading RDS files ###############################
+
+# 3. Loading the RDS files.
+NEI <- base::readRDS("./data/unzipped/summarySCC_PM25.rds")
+SCC <- base::readRDS("./data/unzipped/Source_Classification_Code.rds")
+
+########################### 4. Dataset Manipulation ############################
+
+# 4.1. Filtering NEI dataset of ON-ROAD from all sources.
+NEI_q5 <- base::subset(x = NEI, NEI$fips=="24510" & NEI$type=="ON-ROAD")
+
+# 4.2. Summarizing the dataset to aggregate Emissions into Total divided by year.
+plot_5_data <- NEI_q5 %>%
+    dplyr::group_by(year) %>%
+    dplyr::summarise(Total = base::sum(Emissions))
+
+########################### 5. Plot 5 ##########################################
+
+# 5.1. Exporting a PNG file. 
+grDevices::png(filename = "plot5.png", height = 480, width = 800)
+
+    # 5.1.1. Creating a ggplot2 graph.
+    ggplot2::ggplot(data = plot_5_data,
+                    ggplot2::aes(x = year,
+                                 y = Total)) +
+        
+        # Defining stacked bars.
+        ggplot2::geom_bar(position = "stack",
+                          stat = "identity") + 
+        
+        # Adding labels with value over the bars.
+        ggplot2::geom_text(data = plot_5_data,
+                           ggplot2::aes(x = year,
+                                        label = base::format(x = Total,
+                                                             nsmall = 1,digits = 1), # Rouding the values.
+                                        y = Total,
+                                        fill = NULL),
+                           nudge_y = 10) + 
+        
+        # Setting the years.
+        ggplot2::scale_x_discrete(limits = c(1999, 2002, 2005, 2008)) +
+
+        # Adding title
+        ggplot2::labs(title = base::expression('Vehicle Emissions PM'[2.5] ~ ' in Baltimore')) + 
+        
+        # Adding x-axis label.
+        ggplot2::xlab("Year") + 
+        
+        # Adding y-axis label.
+        ggplot2::ylab(base::expression('Total PM'[2.5] ~ 'Emissions (tons)')) +
+        
+        # Editing the legend position/align and title position.
+        ggplot2::theme(legend.position = "bottom",
+                       legend.title.align = 0.5,
+                       plot.title = ggplot2::element_text(hjust = 0.5)) + 
+        
+        # Removing the legend title.
+        ggplot2::guides(fill = ggplot2::guide_legend(title = "")) -> p5
+    
+    # Printing the ggplot2 graph.
+    base::print(p5)
+
+# 5.2. Closing the device.
+grDevices::dev.off()

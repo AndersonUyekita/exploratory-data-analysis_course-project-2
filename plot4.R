@@ -1,93 +1,115 @@
-#######################################################################################
-#                                                                                     #
-# Author: Anderson Hitoshi Uyekita                                                    #
-# Exploratory Data Analysis                                                           #
-# Course Project 02 - Week 3 - Coursera                                               #
-# File: plot4.R                                                                      #
-#                                                                                     #
-#######################################################################################
+################################################################################
+#                                                                              #
+#   Specialization: Data Science - Foundations using R Specialization          #
+#           Course: Exploratory Data Analysis                                  #
+#                                                                              #
+#           Author: Anderson Hitoshi Uyekita                                   #
+#             Date: 2022/06/18                                                 #
+#                                                                              #
+#   Course Project: EPA National Emissions Inventory (Week 4)                  #
+#      Deliverable: plot4.R                                                    #
+#                                                                              #
+################################################################################
 
-############################### 1. Work Directory #####################################
-# Saving the original work directory
-root_original <- getwd()
+########################### Libraries Requirements #############################
 
-# All manipulation data will start in the root.
-setwd("~")
+library(ggplot2)
+library(magrittr)
+library(tidyverse)
 
-################################ 2. Work Directory ####################################
-# Create a project directory
-if(!file.exists("Project02"))
-{
-        dir.create("Project02")
+########################### 1. Creating a folder ###############################
+
+# 1. Create a data directory
+if(!base::file.exists("data")) {
+    base::dir.create("data")
 }
 
-# Set as Work Directory
-setwd("Project02")
+########################### 2. Downloading data ################################
 
-################################ 3. Download Data #####################################
-library(httr) 
-url <- "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip"
-if(!file.exists("FNEI_data.zip"))
-{
-        download.file(url, "FNEI_data.zip")
+# 2. Download files and store it in data directory.
+if(!base::file.exists("./data/FNEI_data.zip")){
+    utils::download.file(url = "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip",
+                         destfile = "./data/FNEI_data.zip")
 }
 
-# Removing the URL
-rm(url)
-
-# Unzipping the power_consumption file
-if(!file.exists("Source_Classification_Code.rds") | !file.exists("summarySCC_PM25.rds"))
-{
-        unzip("FNEI_data.zip", list = FALSE, overwrite = TRUE)
+# 2.1. Unzipping the FNEI_data.zip file.
+if(!base::file.exists("./data/unzipped/Source_Classification_Code.rds") | !base::file.exists("./data/unzipped/summarySCC_PM25.rds")){
+    utils::unzip(zipfile = "./data/FNEI_data.zip",
+                 exdir = "./data/unzipped/",
+                 list = FALSE,
+                 overwrite = TRUE)
 }
 
-file_unzipped <- c("./Source_Classification_Code.rds","./summarySCC_PM25.rds")
+########################### 3. Loading RDS files ###############################
 
-################################ 4. Loading the data ##################################
-raw_dataset = list(data.frame(),data.frame())
+# 3. Loading the RDS files.
+NEI <- base::readRDS("./data/unzipped/summarySCC_PM25.rds")
+SCC <- base::readRDS("./data/unzipped/Source_Classification_Code.rds")
 
-for (i in 1:length(file_unzipped))
-{
-        raw_dataset[[i]] <- readRDS(file_unzipped[i])
-}
+########################### 4. Dataset Manipulation ############################
 
-names(raw_dataset) <- c("SCC","NEI")
+# 4.1. Filtering the SCC cods from Coal.
+SCC_list <- SCC %>% 
+    dplyr::filter(base::grepl(x = EI.Sector,
+                              pattern = "Coal|coal")) %>%
+    dplyr::select(SCC, EI.Sector)
 
+# 4.2. Filtering NEI dataset of Coal from a specific SCC list.
+NEI_q4 <- base::subset(x = NEI, SCC %in% SCC_list$SCC)
 
-rm(file_unzipped)
+# 4.3. Merging SCC_list and NEI_q4 to insert a column of EI.Sector on NEI dataset.
+NEI_q4_v2 <- base::merge(NEI_q4, SCC_list)
+
+# 4.4. Calculating the total summation and removing some patterns from EI.Sector column.
+NEI_q4_v3 <- NEI_q4_v2 %>%
+    dplyr::group_by(year, EI.Sector) %>%                                    # Grouping to summarize it by year and EI.Sector.
+    dplyr::summarise(Total = base::sum(Emissions)) %>%                      # Calculating the Total column.
+    dplyr::mutate(EI.Sector = base::gsub(pattern = "Fuel Comb - | - Coal",  # Removing some patterns from EI.Sector
+                                         replacement =  "",                 # Cleaning the info from EI.Sector column.
+                                         x = EI.Sector))
 
 #################################### 5. Plot 4  #######################################
-library(ggplot2)
-library(plyr)
 
-SCC <- raw_dataset$SCC
-NEI <- raw_dataset$NEI
+# 5.1. Exporting a PNG file. 
+grDevices::png(filename = "plot4.png", height = 480, width = 800)
 
-# Selection vetor of "Fuel Comb - Electric Generation - Coal"
-selection_1 <- SCC[SCC$EI.Sector == "Fuel Comb - Electric Generation - Coal", 1]
-
-# Selection vetor of "Fuel Comb - Industrial Boilers, ICEs - Coal"
-selection_2 <- SCC[SCC$EI.Sector == "Fuel Comb - Industrial Boilers, ICEs - Coal", 1]
-
-# Selection vetor of "Fuel Comb - Comm/Institutional - Coal"
-selection_3 <- SCC[SCC$EI.Sector == "Fuel Comb - Comm/Institutional - Coal", 1]
-
-# Subset data with selections vectors
-subset_NEI_1 <- subset(NEI, SCC %in% selection_1)
-subset_NEI_2 <- subset(NEI, SCC %in% selection_2)
-subset_NEI_3 <- subset(NEI, SCC %in% selection_3)
-
-# Bind all subsets into a biger one
-subset_NEI <- rbind(subset_NEI_1, subset_NEI_2, subset_NEI_3)
-
-# plot4
-
-png(filename = "plot4.png")  
+    # 5.1.1. Creating a ggplot2 graph.
+    ggplot2::ggplot(data = NEI_q4_v3,
+                    ggplot2::aes(x = year,
+                                 y = Total/1000,       # Re-scaling to thousands.
+                                 fill = EI.Sector)) +
         
-plot_data <- ddply(subset_NEI, .(year), numcolwise(sum))
+        # Defining stacked bars.
+        ggplot2::geom_bar(position = "stack", stat = "identity") + 
         
-plot <- ggplot(plot_data) + aes(x = factor(year), y = Emissions, group = 1) + geom_line(colour = "blue", size = 1) + labs(title = expression('Coal Combustion PM'[2.5] ~ ' in the United States'), x = "Year", y = expression("Total PM"[2.5] ~ "emission (tons)"))
+        # Adding labels with value over the bars.
+        ggplot2::geom_text(data = NEI_q4_v3_total,
+                           ggplot2::aes(x = year,
+                                        label = base::format(x = Total,
+                                                             nsmall = 1, digits = 1), # Rounding the number.
+                                        y = Total,
+                                        fill = NULL),
+                           nudge_y = 10) + # Distance to the point.
         
-print(plot)
+        # Setting the years.
+        ggplot2::scale_x_discrete(limits = c(1999, 2002, 2005, 2008)) +
         
-dev.off()
+        # Adding title
+        ggplot2::labs(title = base::expression('Coal Combustion PM'[2.5] ~ ' in the United States')) + 
+        
+        # Adding x-axis label.
+        ggplot2::xlab("Year") +
+        
+        # Adding y-axis label.
+        ggplot2::ylab(base::expression('PM'[2.5] ~ 'Emissions (10' ^3 ~ 'tons)')) +
+        
+        # Editing the legend position and tile position.
+        ggplot2::theme(legend.position = "bottom",
+                       legend.title.align = 0.5,
+                       plot.title = ggplot2::element_text(hjust = 0.5)) +
+        
+        # Removing the legend title.
+        ggplot2::guides(fill = ggplot2::guide_legend(title = ""))
+
+# 5.2. Closing the device.
+grDevices::dev.off()

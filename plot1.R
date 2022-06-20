@@ -11,6 +11,11 @@
 #                                                                              #
 ################################################################################
 
+########################### Libraries Requirements #############################
+
+library(magrittr)
+library(tidyverse)
+
 ########################### 1. Creating a folder ###############################
 
 # 1. Create a data directory
@@ -37,42 +42,46 @@ if(!base::file.exists("./data/unzipped/Source_Classification_Code.rds") | !base:
 ########################### 3. Loading RDS files ###############################
 
 # 3. Loading the RDS files.
-NEI <- readRDS("./data/unzipped/summarySCC_PM25.rds")
-SCC <- readRDS("./data/unzipped/Source_Classification_Code.rds")
+NEI <- base::readRDS("./data/unzipped/summarySCC_PM25.rds")
+SCC <- base::readRDS("./data/unzipped/Source_Classification_Code.rds")
 
-########################### 4. Plot 1 ##########################################
-with(data = NEI, {
+########################### 4. Dataset Manipulation ############################
+# 4.1. Creating a subsetting to plot 1.
+plot_1_data <- NEI %>%
+     dplyr::group_by(year) %>%
+     dplyr::summarise(total = base::sum(Emissions))
+
+########################### 5. Plot 1 ##########################################
+
+# 5.1. Defining the plot_1_data as data of the graph.
+base::with(data = plot_1_data, {
     
-    # Creating a PNG file.
-    png(filename = "plot1.png")  
+    # 5.1.1. Creating a PNG file.
+    grDevices::png(filename = "plot1.png", height = 480, width = 800)  
     
-    # Creating a subsetting to plot 1.
-    plot_1_data <- with(data = NEI,
-                        base::tapply(X = Emissions, # The tapply will create
-                                     INDEX = year,  # a total emissions of
-                                     FUN = sum))    # each year.
+        # 5.1.1.1. Add a outer margin to the plot.
+        par(oma = c(1,1,1,1))
+        
+        # 5.1.1.2. Creating the barchart plotting using base graphic system.
+        p <- graphics::barplot(total/1000000, # Re-scaling to million.
+                               name = year,
+                                
+                               # Adding title.
+                               main = base::expression('Total PM'[2.5] ~ ' in the United States'),
+                     
+                               # Adding y-axis label.
+                               ylab = base::expression('PM'[2.5] ~ 'Emissions (10' ^6 ~ 'tons)'),
+                                 
+                               # Adding x-axis label.
+                               xlab = "Year")
+        
+        # 5.1.1.3. Adding text over the bars.
+        graphics::text(x = p,
+                       y = total/1000000 - 0.5,            # Re-scaling to million.
+                       label = base::format(total/1000000, # Re-scaling to million.
+                                            nsmall = 1,          # Rounding the number.
+                                            digits = 1))
     
-    # The above code has the same results of:
-    # plot_1_data <- NEI %>%
-    #     dplyr::group_by(year) %>%
-    #     dplyr::summarise(total = base::sum(Emissions))
-    
-    # Add a outer margin to the plot.
-    par(oma = c(1,1,1,1))
-    
-    # Creating the barchart plotting using base graphic system.
-    p <- barplot(plot_1_data/1000000,
-                 main = expression('Total PM'[2.5] ~ ' in the United States'),
-                 ylab = expression('PM'[2.5] ~ 'Emissions (10' ^6 ~ 'tons)'),
-                 xlab = "Year")
-    
-    # Adding text over the bars.
-    text(x = p,
-         y = plot_1_data/1000000 - 0.5 ,
-         label = format(plot_1_data/1000000,
-                        nsmall = 1,
-                        digits = 1))
-    
-    # Closing the device.
-    dev.off()      
+    # 5.1.2. Closing the device.
+    grDevices::dev.off()      
 })

@@ -192,3 +192,17 @@ utils::str(SCC)
 ### 2.2. Output
 
 The results of this assignment are 6 (six) files `.R` and 6 (six) files `png`.
+
+**EI.Sector**
+
+There are 59 types of `EI.Sector`:
+
+```{r,cache=TRUE,warning=FALSE,message=FALSE,include=TRUE,echo=FALSE}
+unique(SCC$EI.Sector)
+```
+
+The EI.Sector related to Coal:
+
+```{r,cache=TRUE,warning=FALSE,message=FALSE,include=TRUE,echo=FALSE}
+unique(SCC$EI.Sector)[grepl(unique(SCC$EI.Sector), pattern = "Coal|coal")]
+```

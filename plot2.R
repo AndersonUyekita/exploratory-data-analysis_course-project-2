@@ -11,6 +11,11 @@
 #                                                                              #
 ################################################################################
 
+########################### Libraries Requirements #############################
+
+library(magrittr)
+library(tidyverse)
+
 ########################### 1. Creating a folder ###############################
 
 # 1. Create a data directory
@@ -37,8 +42,8 @@ if(!base::file.exists("./data/unzipped/Source_Classification_Code.rds") | !base:
 ########################### 3. Loading RDS files ###############################
 
 # 3. Loading the RDS files.
-NEI <- readRDS("./data/unzipped/summarySCC_PM25.rds")
-SCC <- readRDS("./data/unzipped/Source_Classification_Code.rds")
+NEI <- base::readRDS("./data/unzipped/summarySCC_PM25.rds")
+SCC <- base::readRDS("./data/unzipped/Source_Classification_Code.rds")
 
 ########################### 4. Dataset Manipulation ############################
 
@@ -51,27 +56,35 @@ plot_2_data <- NEI_q2 %>%
     dplyr::summarise(total = base::sum(Emissions))
 
 ########################### 5. Plot 2 ##########################################
-with(data = plot_2_data, {
+
+# 5.1. Defining the plot_1_data as data of the graph.
+base::with(data = plot_2_data, {
     
-    # Creating a PNG file.
-    png(filename = "plot2.png")  
+    # 5.1.1. Creating a PNG file.
+    grDevices::png(filename = "plot2.png", height = 480, width = 800)  
     
-    # Add a outer margin to the plot.
-    par(oma = c(1,1,1,1))
+        # 5.1.1.1. Add a outer margin to the plot.
+        par(oma = c(1,1,1,1))
+        
+        # 5.1.1.2. Creating the barchart plotting using base graphic system.
+        p <- grDevices::barplot(height = total, name = year,
+                                
+                                # Adding title.
+                                main = base::expression('Total PM'[2.5] ~ ' in Baltimore City'),
+                                
+                                # Adding y-axis label.
+                                ylab = base::expression('PM'[2.5] ~ 'Emissions (tons)'),
+                                
+                                # Adding x-axis label.
+                                xlab = "Year")
+        
+        # 5.1.1.3. Adding text over the bars.
+        grDevices::text(x = p,
+                        y = total - 100,
+                        label = base::format(total,
+                                             nsmall = 1,   # Rounding the number.
+                                             digits = 1))
     
-    # Creating the barchart plotting using base graphic system.
-    p <- barplot(height = total, name = year,
-                 main = base::expression('Total PM'[2.5] ~ ' in Baltimore City'),
-                 ylab = base::expression('PM'[2.5] ~ 'Emissions (tons)'),
-                 xlab = "Year")
-    
-    # Adding text over the bars.
-    text(x = p,
-         y = total - 100,
-         label = base::format(total,
-                              nsmall = 1,
-                              digits = 1))
-    
-    # Closing the device.
-    dev.off()      
+    # 5.1.2. Closing the device.
+    grDevices::dev.off()      
 })
