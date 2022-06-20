@@ -59,7 +59,7 @@ Based on the plots created to address the questions, I have figured out that PM2
 
 Finally, the Coal PM2.5 is mostly from Electric Generation, and one observed a sharp reduction in Coal PM2.5 between 2005 and 2008.
 
-Feel free to look at the [Codebook]`r if(knitr::is_html_output()){sprintf(fmt="(%s){target='_blank' rel='noopener'}",params$codebook)}else{"(./codebook)"}` to go in-depth.
+Feel free to look at the [Codebook]`r if(knitr::is_html_output()){sprintf(fmt="(%s){target='_blank' rel='noopener'}",params$codebook)}else{"(./codebook.md)"}` to go in-depth.
 
 --------------------------------------------------------------------------------
 

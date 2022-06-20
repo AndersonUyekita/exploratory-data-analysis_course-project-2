@@ -42,7 +42,7 @@ had increased until 2005 when in 2008 the pollution decreased by almost
 Finally, the Coal PM2.5 is mostly from Electric Generation, and one
 observed a sharp reduction in Coal PM2.5 between 2005 and 2008.
 
-Feel free to look at the [Codebook](./codebook) to go in-depth.
+Feel free to look at the [Codebook](./codebook.md) to go in-depth.
 
 ------------------------------------------------------------------------
 
