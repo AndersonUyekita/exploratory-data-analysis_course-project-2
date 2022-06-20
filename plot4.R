@@ -68,6 +68,10 @@ NEI_q4_v3 <- NEI_q4_v2 %>%
                                          replacement =  "",                 # Cleaning the info from EI.Sector column.
                                          x = EI.Sector))
 
+# 4.5. Auxiliary dataset to calculate the total of each bar.
+NEI_q4_v3_total <- NEI_q4_v3 %>%
+    dplyr::summarise(Total = base::sum(Total)/1000)
+
 #################################### 5. Plot 4  #######################################
 
 # 5.1. Exporting a PNG file. 
