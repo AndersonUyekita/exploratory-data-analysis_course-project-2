@@ -22,7 +22,8 @@ params:
   slug: 'Week%204'
   rpubs: 'https://rpubs.com/AndersonUyekita/course-project-2_exploratory-data-analysis'
   project_repo: 'https://github.com/AndersonUyekita/exploratory-data-analysis_course-project-2'
-  codebook: 'https://github.com/AndersonUyekita/exploratory-data-analysis_course-project-2/blob/master/Codebook.md'
+  codebook: 'https://github.com/AndersonUyekita/exploratory-data-analysis_course-project-2/blob/master/codebook.md'
+  instructions: 'https://github.com/AndersonUyekita/exploratory-data-analysis_course-project-2/blob/master/instructions.md'
 ---
 
 ```{r setup, include=FALSE,message=FALSE,warning=FALSE,cache=TRUE}
@@ -36,13 +37,14 @@ library(ggplot2)
 ```
 
 `r if(!knitr::is_html_output()) {sprintf(fmt = "* &#x1f468;&#x1F3FB;&#x200d;&#x1f4bb; Author: %s", params$author)}`
-* `r sprintf(fmt = "&#x1f4da; Specialization: [%s](%s){target='_blank' rel='noopener'}", params$specialization, params$specialization_url)`
-* `r sprintf(fmt = "&#x1f4d6; Course: [%s](%s){target='_blank' rel='noopener'}", params$course, params$course_url)`
-    * `r sprintf(fmt = "&#x1F9D1;&#x200d;&#x1F3EB; Instructor: %s", params$instructor)`
-* `r sprintf(fmt = "&#x1F4C6; %s", params$week)`
-    * `r sprintf(fmt = "&#x1F6A6; Start: %s", format(params$course_start, "%A, %d %B %Y"))`
-    * `r sprintf(fmt = "&#x1F3C1; Finish: %s", format(params$course_finish, "%A, %d %B %Y"))`
+`r sprintf(fmt = "* &#x1f4da; Specialization: [%s](%s){target='_blank' rel='noopener'}", params$specialization, params$specialization_url)`
+`r sprintf(fmt = "* &#x1f4d6; Course: [%s](%s){target='_blank' rel='noopener'}", params$course, params$course_url)`
+    `r sprintf(fmt = "* &#x1F9D1;&#x200d;&#x1F3EB; Instructor: %s", params$instructor)`
+`r sprintf(fmt = "* &#x1F4C6; %s", params$week)`
+    `r sprintf(fmt = "* &#x1F6A6; Start: %s", format(params$course_start, "%A, %d %B %Y"))`
+    `r sprintf(fmt = "* &#x1F3C1; Finish: %s", format(params$course_finish, "%A, %d %B %Y"))`
 `r if(!knitr::is_html_output()) {sprintf(fmt = "* &#x1F30E; Rpubs: [Interactive Document](%s)", params$rpubs)}else{sprintf(fmt = "* &#x1F4E6; Github Repository: [Static Document](%s){target='_blank' rel='noopener'}", params$project_repo)}`
+`r if(!knitr::is_html_output()) {sprintf(fmt = "* &#x1F4CB; Instructions: [Project Instructions](%s)", "./instructions.md")}else{sprintf(fmt = "* &#x1F4CB; Instructions: [Project Instructions](%s){target='_blank' rel='noopener'}", params$instructions)}`
 
 --------------------------------------------------------------------------------
 

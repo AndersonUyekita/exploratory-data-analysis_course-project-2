@@ -15,6 +15,7 @@
     -   🏁 Finish: Sunday, 19 June 2022
 -   🌎 Rpubs: [Interactive
     Document](https://rpubs.com/AndersonUyekita/course-project-2_exploratory-data-analysis)
+-   📋 Instructions: [Project Instructions](./instructions.md)
 
 ------------------------------------------------------------------------
 
