@@ -12,9 +12,10 @@
     -   🧑‍🏫 Instructor: Roger D Peng
 -   📆 Week 4
     -   🚦 Start: Wednesday, 15 June 2022
-    -   🏁 Finish: Friday, 17 June 2022
--   📄
-    [README](https://github.com/AndersonUyekita/exploratory-data-analysis_course-project-2/)
+    -   🏁 Finish: Sunday, 19 June 2022
+-   📄 README: [README.md](./README.md)
+-   🌎 Rpubs: [Interactive
+    Document](https://rpubs.com/AndersonUyekita/course-project-2_exploratory-data-analysis)
 
 ------------------------------------------------------------------------
 
