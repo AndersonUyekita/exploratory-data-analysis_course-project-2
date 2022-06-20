@@ -3,6 +3,12 @@ title: '`Course Project 2` Exploratory Data Analysis'
 author: '`r if(knitr::is_html_output()) {"&#x1f468;&#x1F3FB;&#x200d;&#x1f4bb; Anderson H Uyekita"} else {NULL}`'
 output:
   github_document: default
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
 params:
   author: "Anderson H Uyekita"
   course: "Exploratory Data Analysis"
@@ -12,10 +18,11 @@ params:
   instructor: "Roger D Peng"
   week: "Week 4"
   course_start: !r lubridate::ymd("2022/06/15")
-  course_finish: !r lubridate::today()
+  course_finish: !r lubridate::ymd("2022/06/19")
   slug: 'Week%204'
   rpubs: 'https://rpubs.com/AndersonUyekita/course-project-2_exploratory-data-analysis'
   project_repo: 'https://github.com/AndersonUyekita/exploratory-data-analysis_course-project-2'
+  codebook: 'https://github.com/AndersonUyekita/exploratory-data-analysis_course-project-2/blob/master/Codebook.md'
 ---
 
 ```{r setup, include=FALSE,message=FALSE,warning=FALSE,cache=TRUE}
@@ -28,7 +35,7 @@ library(lubridate)
 library(ggplot2)
 ```
 
-* `r if(!knitr::is_html_output()) {sprintf(fmt = "&#x1f468;&#x1F3FB;&#x200d;&#x1f4bb; Author: %s", params$author)}`
+`r if(!knitr::is_html_output()) {sprintf(fmt = "* &#x1f468;&#x1F3FB;&#x200d;&#x1f4bb; Author: %s", params$author)}`
 * `r sprintf(fmt = "&#x1f4da; Specialization: [%s](%s){target='_blank' rel='noopener'}", params$specialization, params$specialization_url)`
 * `r sprintf(fmt = "&#x1f4d6; Course: [%s](%s){target='_blank' rel='noopener'}", params$course, params$course_url)`
     * `r sprintf(fmt = "&#x1F9D1;&#x200d;&#x1F3EB; Instructor: %s", params$instructor)`
@@ -41,7 +48,16 @@ library(ggplot2)
 
 ## Sinopsis
 
+Course Project 2 aims to create six plots using base `graphic` and `ggplot2` to answer six given questions. The datasets used for this assignment are from the National Emissions Inventory (NEI), which is recorded every three years. The current Course Project will cover the years from 1999 to 2008. The datasets comprise 2 data frames:
 
+i. The `summarySCC_PM25.rds` with almost 6.5 million observations and 6 variables, and;
+ii. The `Source_Classification_Code.rds` with over 11,7 thousand observations and 15 variables.
+
+Based on the plots created to address the questions, I have figured out that PM2.5 emissions have decreased over the years all over the US. Although, In Baltimore City, it is clear the pollution emission reduction from vehicles, in Los Angeles County, the PM2.5 from vehicles had increased until 2005 when in 2008 the pollution decreased by almost 9%.
+
+Finally, the Coal PM2.5 is mostly from Electric Generation, and one observed a sharp reduction in Coal PM2.5 between 2005 and 2008.
+
+Feel free to look at the [Codebook]`r if(knitr::is_html_output()){sprintf(fmt="(%s){target='_blank' rel='noopener'}",params$codebook)}else{"(./codebook)"}` to go in-depth.
 
 --------------------------------------------------------------------------------
 
@@ -301,6 +317,9 @@ grDevices::png(filename = "plot3.png", height = 480, width = 800)
     # Adding labels to each point.
     ggplot2::geom_text(hjust = 0.5, vjust = 0.5) + 
         
+    # Setting the years.
+    ggplot2::scale_x_discrete(limits = c(1999, 2002, 2005, 2008)) +
+        
     # Editing the Graphic Tile.
     ggplot2::labs(title = base::expression('Emissions of PM'[2.5] ~ ' in Baltimore')) +
         
@@ -384,6 +403,10 @@ NEI_q4_v3 <- NEI_q4_v2 %>%
     dplyr::mutate(EI.Sector = base::gsub(pattern = "Fuel Comb - | - Coal",  # Removing some patterns from EI.Sector
                                          replacement =  "",                 # Cleaning the info from EI.Sector column.
                                          x = EI.Sector))
+
+# 4.5. Auxiliary dataset to calculate the total of each bar.
+NEI_q4_v3_total <- NEI_q4_v3 %>%
+    dplyr::summarise(Total = base::sum(Total)/1000)
 
 #################################### 5. Plot 4  #######################################
 
@@ -664,5 +687,3 @@ grDevices::dev.off()
 Baltimore City has decreased its PM2.5 emissions from the vehicle by 74.5%. However, in the opposite direction, Los Angeles has increased its PM 2.5 emissions by 4.3%.
 
 Los Angeles did not significantly change its fine particulate matter emissions, but Baltimore has advanced a lot, showing the more substantial changes in PM2.5 emissions over time.
-
-## 2. 

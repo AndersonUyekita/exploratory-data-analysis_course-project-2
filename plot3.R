@@ -74,6 +74,9 @@ grDevices::png(filename = "plot3.png", height = 480, width = 800)
     # Adding labels to each point.
     ggplot2::geom_text(hjust = 0.5, vjust = 0.5) + 
         
+    # Setting the years.
+    ggplot2::scale_x_discrete(limits = c(1999, 2002, 2005, 2008)) +
+        
     # Editing the Graphic Tile.
     ggplot2::labs(title = base::expression('Emissions of PM'[2.5] ~ ' in Baltimore')) +
         
